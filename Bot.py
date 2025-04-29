@@ -30,6 +30,7 @@ def webhook():
         return 'Wrong event type', 400
 
 
+@app.route("/")
 def home():
     return render_template("index.html")
 @app.route("/get")
