@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot AISHA</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+
+<body>
+  <section class="dashboard" style="z-index:2;">
+    <div class="dashboard-place">
+      <iframe title="coVID DASHBOARD" width="700" height="573.5"
+        src="https://app.powerbi.com/view?r=eyJrIjoiNTVhMTU0NTMtMTM5ZC00OGM1LWE4YmItYzRkOGZlYjA1YzAxIiwidCI6IjgzMDBmNTRhLWZjNTMtNDUyYi05Y2Y1LTQxNmIwMjE0NzA4OSJ9"
+        frameborder="0" allowFullScreen="true"></iframe>
+    </div>
+    <button type="submit" class="openthechat">OPEN CHATBOT</button>
+  </section>
+  <section style="z-index:900;position:absolute;top:0;left:100;">
+    <div id="overlay" class="overlay" onclick="hideOverlay()">
+
+    </div>
+
+  </section>
+
+  <section class="msger" style="z-index:1;">
+    <header class="msger-header">
+      <div class="msger-header-title">
+        <i class="fas fa-bug"></i> AI-SHA SEIR COVID ChatBot <i class="fas fa-bug"></i>
+      </div>
+    </header>
+
+    <main class="msger-chat">
+      <div class="msg left-msg">
+        <div class="msg-img" style="background-image: url(https://image.flaticon.com/icons/svg/327/327779.svg)">
+        </div>
+
+        <div class="msg-bubble">
+          <div class="msg-info">
+            <div class="msg-info-name">AISHA</div>
+            <div class="msg-info-time">00:00</div>
+          </div>
+
+          <div class="msg-text">
+            Hi, I am Aisha. A Chatbot made to clarify your doubts on Covid 19. Feel free to ask me any questions
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <form class="msger-inputarea">
+      <input type="text" class="msger-input" id="textInput" placeholder="Enter your message...">
+      <button type="submit" class="msger-send-btn">Send</button>
+    </form>
+  </section>
+  <!-- partial:index.partial.html -->
+  <!-- partial -->
+  <script src='https://use.fontawesome.com/releases/v5.0.13/js/all.js'></script>
+  <script>
+    function showOverlay() {
+      document.getElementById("overlay").style.display = "block";
+    }
+    function hideOverlay() {
+      document.getElementById("overlay").style.display = "none";
+    }
+
+    const msgerForm = get(".msger-inputarea");
+    const msgerInput = get(".msger-input");
+    const msgerChat = get(".msger-chat");
+    const image = get(".overlay");
+
+    // Icons made by Freepik from www.flaticon.com
+    const BOT_IMG = "static/images/bot.png";
+    const PERSON_IMG = "static/images/user.png";
+    const BOT_NAME = "    Aisha";
+    const PERSON_NAME = "You";
+
+    const buttonS = get('.openthechat')
+    const popup = get('.msger')
+    buttonS.addEventListener('click', () => {
+      if (popup.style.display === 'none') {
+        popup.style.display = 'flex';
+      }
+      else { popup.style.display = 'none'; }
+
+    })
+
+    msgerForm.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const msgText = msgerInput.value;
+      if (!msgText) return;
+      appendMessage(PERSON_NAME, PERSON_IMG, "right", msgText);
+      msgerInput.value = "";
+      botResponse(msgText);
+    });
+
+    function appendMessage(name, img, side, text) {
+      let len = text.length;
+      if (len > 500) {
+        var msgHTML = `
+          <div class="msg ${side}-msg">
+  <div class="msg-img" style="background-image: url(${img})"></div>
+
+  <div class="msg-bubble">
+    <div class="msg-info">
+      <div class="msg-info-name">${name}</div>
+      <div class="msg-info-time">${formatDate(new Date())}</div>
+    </div>
+    
+    <a href="javascript:showOverlay()"><img src="data:image/png;base64,${text}" alt="something prolly a plot" height= 250.0 width=250.0></a>
+    </div>
+</div>
+`;
+        var imghtml = `
+<div style=" max-width:80%; max-height:80%">
+  <img src="data:image/png;base64,${text}" alt="the image" height=50% width=50% >
+  </div>
+`
+      }
+      else {
+        var msgHTML = `
+          <div class="msg ${side}-msg">
+  <div class="msg-img" style="background-image: url(${img})"></div>
+
+  <div class="msg-bubble">
+    <div class="msg-info">
+      <div class="msg-info-name">${name}</div>
+      <div class="msg-info-time">${formatDate(new Date())}</div>
+    </div>
+    <div class="msg-text">${text}</div>
+    </div>
+</div>
+`;
+      }
+      image.insertAdjacentHTML("beforeend", imghtml);
+      msgerChat.insertAdjacentHTML("beforeend", msgHTML);
+      msgerChat.scrollTop += 500;
+    }
+
+
+
+    function botResponse(rawText) {
+
+      // Bot Response
+      $.get("/get", { msg: rawText }).done(function (data) {
+        console.log(rawText);
+        console.log(data);
+        const msgText = data;
+        console.log(rawText.includes("plot from html js"))
+        if ((rawText.includes("plot") == true)) {
+          console.log("hi this is plot space");
+          appendMessage(BOT_NAME, BOT_IMG, "left", msgText);
+        }
+        else {
+          appendMessage(BOT_NAME, BOT_IMG, "left", msgText);
+        }
+      });
+
+    }
+
+
+    // Utils
+    function get(selector, root = document) {
+      return root.querySelector(selector);
+    }
+
+    function formatDate(date) {
+      const h = "0" + date.getHours();
+      const m = "0" + date.getMinutes();
+
+      return `${h.slice(-2)}:${m.slice(-2)}`;
+    }
+
+
+
+  </script>
+
+</body>
+
+</html>
